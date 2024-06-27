@@ -27,8 +27,46 @@ class SVM:
 
     def predict(self, X_test):
         approx = np.dot(X_test, self.weights) - self.bias
-        pass
+        return np.sign(approx)
 
 
 if __name__ == "__main__":
-    pass
+    from sklearn.datasets import load_iris, make_blobs
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.metrics import classification_report, accuracy_score
+
+    X, y = load_iris(return_X_y=True)
+    X = X[:100, [0, 2]]
+    y = y[:100]
+    y = np.where(y == 0, -1, 1)
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_scaled, y, test_size=0.2, random_state=123
+    )
+
+    svm = SVM()
+    svm.fit(X_train, y_train)
+
+    y_pred = svm.predict(X_test)
+    print(accuracy_score(y_test, y_pred))
+
+    print(classification_report(y_test, y_pred))
+
+    # X, y = make_blobs(
+    #     n_samples=100, n_features=2, centers=2, cluster_std=1.05, random_state=123
+    # )
+    # y = np.where(y == 0, -1, 1)
+
+    # X_train, X_test, y_train, y_test = train_test_split(
+    #     X, y, test_size=0.2, random_state=123
+    # )
+
+    # svm = SVM()
+    # svm.fit(X_train, y_train)
+    # y_pred = svm.predict(X_test)
+
+    # print(accuracy_score(y_test, y_pred))
