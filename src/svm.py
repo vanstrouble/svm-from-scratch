@@ -25,14 +25,28 @@ class SVM:
                     )
                     self.bias -= self.lr * y_[index]
 
+        return self
+
     def predict(self, X_test):
         approx = np.dot(X_test, self.weights) - self.bias
         return np.sign(approx)
 
+    def get_params(self, deep=True):
+        return {
+            "learning_rate": self.lr,
+            "lambda_param": self.lambda_param,
+            "n_iters": self.n_iters
+        }
+
+    def set_params(self, **params):
+        for param, value in params.items():
+            setattr(self, param, value)
+        return self
+
 
 if __name__ == "__main__":
     from sklearn.datasets import load_iris, make_blobs
-    from sklearn.model_selection import train_test_split
+    from sklearn.model_selection import train_test_split, GridSearchCV
     from sklearn.preprocessing import StandardScaler
     from sklearn.metrics import classification_report, accuracy_score
 
@@ -48,13 +62,25 @@ if __name__ == "__main__":
         X_scaled, y, test_size=0.2, random_state=123
     )
 
-    svm = SVM()
-    svm.fit(X_train, y_train)
+    param_grid = {
+        "learning_rate": [0.0001, 0.001, 0.01, 0.1],
+        "lambda_param": [0.001, 0.01, 0.1, 1],
+        "n_iters": [100, 1000, 5000, 10000],
+    }
 
-    y_pred = svm.predict(X_test)
+    grid_search = GridSearchCV(SVM(), param_grid, cv=5, scoring="accuracy", verbose=1, n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+    print(grid_search.best_params_)
+    print(grid_search.best_score_)
+
+    best_svm, best_params = grid_search.best_estimator_, grid_search.best_params_
+    y_pred = best_svm.predict(X_test)
+
+    # svm = SVM()
+    # svm.fit(X_train, y_train)
+
+    # y_pred = svm.predict(X_test)
     print(accuracy_score(y_test, y_pred))
-
-    print(classification_report(y_test, y_pred))
 
     # X, y = make_blobs(
     #     n_samples=100, n_features=2, centers=2, cluster_std=1.05, random_state=123
