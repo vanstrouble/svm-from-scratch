@@ -6,29 +6,40 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 
 
+def huberized_hinge_loss(y_true, y_pred, delta=1.0):
+    z = y_true * y_pred
+    loss = np.where(
+        z >= 1,
+        0,
+        np.where(z >= 1 - delta, (1 - z) ** 2 / (2 * delta), 1 - z - (delta / 2)),
+    )
+    return np.mean(loss)
+
+
 class SVM:
     def __init__(self, learning_rate=0.001, lambda_param=0.1, n_iters=1000) -> None:
-        self.lr = learning_rate
-        self.lambda_param = lambda_param
-        self.n_iters = n_iters
-        self.weights = None
-        self.bias = 0
+        self.lr = learning_rate  # Learning rate
+        self.lambda_param = lambda_param  # Regularization parameter
+        self.n_iters = n_iters  # Number of iterations
+        self.weights = None  # Weights
+        self.bias = 0  # Bias
 
     def fit(self, X_train, y_train):
-        y_ = np.where(y_train <= 0, -1, 1)
+        # y_ = np.where(y_train <= 0, -1, 1)
         self.weights = np.random.randn(X_train.shape[1]) * 0.01
 
         # Update rule
         for _ in range(self.n_iters):
             for index, x_i in enumerate(X_train):
-                condition = y_[index] * np.dot(self.weights, x_i) - self.bias >= 1
-                if condition:
-                    self.weights -= self.lr * (2 * self.lambda_param * self.weights)
-                else:
-                    self.weights -= self.lr * (
-                        2 * self.lambda_param * self.weights - np.dot(y_[index], x_i)
-                    )
-                    self.bias -= self.lr * y_[index]
+                pass
+                # condition = y_[index] * np.dot(self.weights, x_i) - self.bias >= 1
+                # if condition:
+                #     self.weights -= self.lr * (2 * self.lambda_param * self.weights)
+                # else:
+                #     self.weights -= self.lr * (
+                #         2 * self.lambda_param * self.weights - np.dot(y_[index], x_i)
+                #     )
+                #     self.bias -= self.lr * y_[index]
 
         return self
 
@@ -50,51 +61,7 @@ class SVM:
 
 
 if __name__ == "__main__":
-    X, y = load_iris(return_X_y=True)
-    X = X[:100, [0, 2]]
-    y = y[:100]
-    y = np.where(y == 0, -1, 1)
-
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X_scaled, y, test_size=0.2, random_state=123
-    )
-
-    param_grid = {
-        "learning_rate": [0.0001, 0.001, 0.01, 0.1],
-        "lambda_param": [0.001, 0.01, 0.1, 1],
-        "n_iters": [100, 1000, 5000, 10000],
-    }
-
-    grid_search = RandomizedSearchCV(
-        SVM(), param_grid, cv=3, scoring="accuracy", verbose=1, n_jobs=-1
-    )
-    grid_search.fit(X_train, y_train)
-    print(f"Best parameters: \n{grid_search.best_params_}")
-    print(f"\nTrain Accuracy: {grid_search.best_score_}")
-
-    best_svm, best_params = grid_search.best_estimator_, grid_search.best_params_
-    y_pred = best_svm.predict(X_test)
-
-    # svm = SVM()
-    # svm.fit(X_train, y_train)
-
-    # y_pred = svm.predict(X_test)
-    print(f"Model Accuracy: {accuracy_score(y_test, y_pred)}")
-
-    # X, y = make_blobs(
-    #     n_samples=100, n_features=2, centers=2, cluster_std=1.05, random_state=123
-    # )
-    # y = np.where(y == 0, -1, 1)
-
-    # X_train, X_test, y_train, y_test = train_test_split(
-    #     X, y, test_size=0.2, random_state=123
-    # )
-
-    # svm = SVM()
-    # svm.fit(X_train, y_train)
-    # y_pred = svm.predict(X_test)
-
-    # print(accuracy_score(y_test, y_pred))
+    y_true = np.array([1, -1, 1, -1])
+    y_pred = np.array([0.8, -0.5, 1.2, -1.5])
+    loss = huberized_hinge_loss(y_true, y_pred, delta=1.0)
+    print("Huberized Hinge Loss:", loss)
