@@ -23,23 +23,30 @@ class SVM:
         self.n_iters = n_iters  # Number of iterations
         self.weights = None  # Weights
         self.bias = 0  # Bias
+        self.classes = None
+        self.models = None
 
     def fit(self, X_train, y_train):
-        # y_ = np.where(y_train <= 0, -1, 1)
-        self.weights = np.random.randn(X_train.shape[1]) * 0.01
+        self.classes = np.unique(y_train)
+        self.models = {}
 
-        # Update rule
-        for _ in range(self.n_iters):
-            for index, x_i in enumerate(X_train):
-                pass
-                # condition = y_[index] * np.dot(self.weights, x_i) - self.bias >= 1
-                # if condition:
-                #     self.weights -= self.lr * (2 * self.lambda_param * self.weights)
-                # else:
-                #     self.weights -= self.lr * (
-                #         2 * self.lambda_param * self.weights - np.dot(y_[index], x_i)
-                #     )
-                #     self.bias -= self.lr * y_[index]
+        for class_label in self.classes:
+            y_k = np.where(y_train == class_label, 1, -1)
+            self.weights = np.random.randn(X_train.shape[1]) * 0.01
+            bias = 0
+
+            # Update rule
+            for _ in range(self.n_iters):
+                for idx, x_i in enumerate(X_train):
+                    pass
+                    # condition = y_[index] * np.dot(self.weights, x_i) - self.bias >= 1
+                    # if condition:
+                    #     self.weights -= self.lr * (2 * self.lambda_param * self.weights)
+                    # else:
+                    #     self.weights -= self.lr * (
+                    #         2 * self.lambda_param * self.weights - np.dot(y_[index], x_i)
+                    #     )
+                    #     self.bias -= self.lr * y_[index]
 
         return self
 
